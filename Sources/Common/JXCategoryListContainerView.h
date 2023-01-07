@@ -15,7 +15,7 @@
  列表容器视图的类型
 
  - ScrollView: UIScrollView。优势：没有其他副作用。劣势：视图内存占用相对大一点。
- - CollectionView: 使用UICollectionView。优势：因为列表被添加到cell上，视图的内存占用更少，适合内存要求特别高的场景。劣势：因为cell重用机制的问题，导致列表下拉刷新视图，会因为被removeFromSuperview而被隐藏。需要参考`LoadDataListCollectionListViewController`类做特殊处理。
+ - CollectionView: 使用UICollectionView。优势：因为列表被添加到cell上，视图的内存占用更少，适合内存要求特别高的场景。劣势：因为cell重用机制的问题，导致列表下拉刷新视图，会因为被removeFromSuperview而被隐藏。需要参考`LoadDataListCollectionotherListViewController`类做特殊处理。
  */
 typedef NS_ENUM(NSUInteger, JXCategoryListContainerType) {
     JXCategoryListContainerType_ScrollView,
@@ -30,7 +30,7 @@ typedef NS_ENUM(NSUInteger, JXCategoryListContainerType) {
 
  @return 返回列表视图
  */
-- (UIView *)listView;
+- (UIView *)otherListView;
 
 @optional
 

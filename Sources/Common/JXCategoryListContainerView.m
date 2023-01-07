@@ -170,7 +170,7 @@
             self.scrollView.frame = self.bounds;
             self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width*[self.delegate numberOfListsInlistContainerView:self], self.scrollView.bounds.size.height);
             [_validListDict enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull index, id<JXCategoryListContentViewDelegate>  _Nonnull list, BOOL * _Nonnull stop) {
-                [list listView].frame = CGRectMake(index.intValue*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+                [list otherListView].frame = CGRectMake(index.intValue*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
             }];
             self.scrollView.contentOffset = CGPointMake(self.currentIndex*self.scrollView.bounds.size.width, 0);
         }else {
@@ -212,33 +212,33 @@
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
     cell.contentView.backgroundColor = self.listCellBackgroundColor;
     
-    UIView* listView = nil;
+    UIView* otherListView = nil;
     id<JXCategoryListContentViewDelegate> list = _validListDict[@(indexPath.item)];
     if (list != nil) {
-        //fixme:如果list是UIViewController，如果这里的frame修改是`[list listView].frame = cell.bounds;`。那么就必须给list vc添加如下代码:
+        //fixme:如果list是UIViewController，如果这里的frame修改是`[list otherListView].frame = cell.bounds;`。那么就必须给list vc添加如下代码:
         //- (void)loadView {
         //    self.view = [[UIView alloc] init];
         //}
         //所以，总感觉是把UIViewController当做普通view使用，导致了系统内部的bug。所以，缓兵之计就是用下面的方法，暂时解决问题。
-        listView = [list listView];
+        otherListView = [list otherListView];
         if ([list isKindOfClass:[UIViewController class]]) {
-            listView.frame = cell.contentView.bounds;
+            otherListView.frame = cell.contentView.bounds;
         } else {
-            listView.frame = cell.bounds;
+            otherListView.frame = cell.bounds;
         }
     }
     
     BOOL isAdded = NO;
     for (UIView *subview in cell.contentView.subviews) {
-        if( listView != subview ) {
+        if( otherListView != subview ) {
             [subview removeFromSuperview];
         } else {
             isAdded = YES;
         }
     }
     
-    if( !isAdded && listView ) {
-        [cell.contentView addSubview:listView];
+    if( !isAdded && otherListView ) {
+        [cell.contentView addSubview:otherListView];
     }
     
     return cell;
@@ -363,7 +363,7 @@
 
 - (void)reloadData {
     for (id<JXCategoryListContentViewDelegate> list in _validListDict.allValues) {
-        [[list listView] removeFromSuperview];
+        [[list otherListView] removeFromSuperview];
         if ([list isKindOfClass:[UIViewController class]]) {
             [(UIViewController *)list removeFromParentViewController];
         }
@@ -400,16 +400,16 @@
     _validListDict[@(index)] = list;
 
     if (self.containerType == JXCategoryListContainerType_ScrollView) {
-        [list listView].frame = CGRectMake(index*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
-        [self.scrollView addSubview:[list listView]];
-        [RTLManager horizontalFlipViewIfNeeded:[list listView]];
+        [list otherListView].frame = CGRectMake(index*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+        [self.scrollView addSubview:[list otherListView]];
+        [RTLManager horizontalFlipViewIfNeeded:[list otherListView]];
     }else {
         UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
         for (UIView *subview in cell.contentView.subviews) {
             [subview removeFromSuperview];
         }
-        [list listView].frame = cell.contentView.bounds;
-        [cell.contentView addSubview:[list listView]];
+        [list otherListView].frame = cell.contentView.bounds;
+        [cell.contentView addSubview:[list otherListView]];
     }
 }
 
@@ -442,10 +442,10 @@
                 _validListDict[@(index)] = list;
             }
             if (self.containerType == JXCategoryListContainerType_ScrollView) {
-                if ([list listView].superview == nil) {
-                    [list listView].frame = CGRectMake(index*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
-                    [self.scrollView addSubview:[list listView]];
-                    [RTLManager horizontalFlipViewIfNeeded:[list listView]];
+                if ([list otherListView].superview == nil) {
+                    [list otherListView].frame = CGRectMake(index*self.scrollView.bounds.size.width, 0, self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+                    [self.scrollView addSubview:[list otherListView]];
+                    [RTLManager horizontalFlipViewIfNeeded:[list otherListView]];
 
                     if (list && [list respondsToSelector:@selector(listWillAppear)]) {
                         [list listWillAppear];
@@ -460,8 +460,8 @@
                 for (UIView *subview in cell.contentView.subviews) {
                     [subview removeFromSuperview];
                 }
-                [list listView].frame = cell.contentView.bounds;
-                [cell.contentView addSubview:[list listView]];
+                [list otherListView].frame = cell.contentView.bounds;
+                [cell.contentView addSubview:[list otherListView]];
 
                 if (list && [list respondsToSelector:@selector(listWillAppear)]) {
                     [list listWillAppear];
